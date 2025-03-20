@@ -1,0 +1,87 @@
+on:
+  workflow_call:
+
+jobs:
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm ci
+      - name: Prettier
+        run: npm run prettier:check
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm ci
+      - name: ESLint
+        run: npm run eslint || false
+
+  html_validate:
+    name: HTML validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm ci
+      - name: HTML Validate
+        run: npm run html-validate || false
+
+  style_lint:
+    name: Stylelint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Stylelint
+        run: npm run stylelint
+
+  pnr_scanner:
+    name: PNR-Scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: Install dependencies
+        run: npm ci
+      - name: pnr-scanner
+        run: |
+          errors=$(npx pnr-scanner . 2> /dev/null | egrep "    " | wc -l)
+          if [[ "${errors}" != "0" ]]; then
+              echo "Found ${errors} potential personnummer. Rerun `npx pnr-scanner .` locally for more information."
+              exit 1
+          fi
+
+  npm-pkg-lint:
+    name: NPM pkg lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: npm-pkg-lint
+        uses: Forsakringskassan/actions/npm-pkg-lint@main
